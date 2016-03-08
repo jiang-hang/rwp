@@ -336,7 +336,7 @@ convBlogs<-function(){
 #' @export 
 #' @examples 
 #' x=c(1,2,3) 
-buildbook<-function(ids,name="~/wpbook",title="")
+buildbook<-function(ids,name="~/wpbook",title="",copyright="copyright.md",preface="preface.md")
 {
 	#get the titles and the markdown file
 	con=plyr::ldply(ids,getBlogV)
@@ -352,6 +352,9 @@ buildbook<-function(ids,name="~/wpbook",title="")
 	system2("mkdir",c(name,"-p"))
 	system2("mkdir",c(paste0(name,"/rfigures"),"-p"))
 	file.copy(finalfile,name,overwrite=TRUE)
+
+	file.copy(paste0(markdownRoot,copyright),name,overwrite=TRUE)
+	file.copy(paste0(markdownRoot,preface),name,overwrite=TRUE)
 	#adding the title
 	#get the title firstly
 	oldwd=getwd()
