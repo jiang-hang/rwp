@@ -362,7 +362,6 @@ buildbook<-function(ids,name="~/wpbook",title="")
 	#compile the file to tex
 	for (x in  mdfiles_in_newplace) {
 		rmarkdown::render(x,bookdown::tex_chapter())
-		#knitr::knit2pdf(x,compiler = 'xelatex')
 	}
 	
 	#fetch the template
