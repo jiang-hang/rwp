@@ -470,3 +470,67 @@ doc_type <- function() {
 is_latex <- function() {
   identical(doc_type(), "latex")
 }
+
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
+#' embed png in the markdown
+#' 
+#' description
+#' 
+#' @param path value
+#' @param dpi value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+embed_png<- function(path, dpi = 200) {
+  if( is_latex() ){
+	#copy the image to local disk
+	#get the imgname
+	tts=strsplit(path,"/")[[1]]
+	dfile=tts[length(tts)]
+	if(! file.exists("./images")){
+		system2("mkdir",c("./images"))
+	}
+	#print(paste("downloading image","./images/",dfile))
+	curl::curl_download(path,paste0("./images/",dfile))
+	path = paste0("./images/",dfile)
+
+        meta <- png_meta(path)
+        dpi <- dpi %||% meta$dpi[1] %||% stop("Unknown dpi", call. = FALSE)
+
+    width <- round(meta$dim[1] / dpi, 2)
+
+    knitr::asis_output(paste0(
+      "\\includegraphics[",
+      "width=", width, "in",
+      "]{", path, "}"
+    ))
+  } else {
+
+        #meta <- png_meta(path)
+        #dpi <- dpi %||% meta$dpi[1] %||% stop("Unknown dpi", call. = FALSE)
+
+    knitr::asis_output(paste0(
+      "<img src='", path, "'/>"
+      #" width='", round(meta$dim[1] / (dpi / 96)), "'",
+      #" height='", round(meta$dim[2] / (dpi / 96)), "'",
+      #" />"
+    ))
+  }
+}
+
+
+#' return the png meta data given the path
+#' 
+#' description
+#' 
+#' @param path value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+png_meta <- function(path) {
+  attr(png::readPNG(path, native = TRUE, info = TRUE), "info")
+}
+
