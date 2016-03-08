@@ -336,7 +336,7 @@ convBlogs<-function(){
 #' @export 
 #' @examples 
 #' x=c(1,2,3) 
-buildbook<-function(ids,name="~/wpbook")
+buildbook<-function(ids,name="~/wpbook",title="")
 {
 	#get the titles and the markdown file
 	con=plyr::ldply(ids,getBlogV)
@@ -373,6 +373,11 @@ buildbook<-function(ids,name="~/wpbook")
 	chapters=sprintf("\\include{%s}",mds)
 	
 	rawtemplate=readLines("./template.tex")
+
+	if (nchar(title) > 1 ){
+		rawtemplate=sub('xxtitle',title,rawtemplate)
+	}
+
 	ll=grep('xxchapter',rawtemplate)
 	if(length(ll) == 1) {
 		rawtemplate[ll] = paste(chapters,collapse="\n")
