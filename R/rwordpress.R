@@ -332,6 +332,11 @@ convBlogs<-function(){
 #' each id is a chapter
 #' 
 #' @param ids value
+#' @param name value
+#' @param title value
+#' @param copyright the copyright md file for the book
+#'        the file should be at the markdownRoot folder
+#' @param preface : the preface md file for the book
 #' @return returndes
 #' @export 
 #' @examples 

@@ -4,7 +4,7 @@
 \alias{embed_png}
 \title{embed png in the markdown}
 \usage{
-embed_png(path, dpi = NULL)
+embed_png(path, dpi = 200)
 }
 \arguments{
 \item{path}{value}

@@ -4,10 +4,20 @@
 \alias{buildbook}
 \title{build a book with the given ids}
 \usage{
-buildbook(ids, name = "~/wpbook")
+buildbook(ids, name = "~/wpbook", title = "", copyright = "copyright.md",
+  preface = "preface.md")
 }
 \arguments{
 \item{ids}{value}
+
+\item{name}{value}
+
+\item{title}{value}
+
+\item{copyright}{the copyright md file for the book
+the file should be at the markdownRoot folder}
+
+\item{preface}{: the preface md file for the book}
 }
 \value{
 returndes
