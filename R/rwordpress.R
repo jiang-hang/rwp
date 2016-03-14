@@ -587,17 +587,33 @@ png_meta <- function(path) {
 #' x=c(1,2,3) 
 html_doc<-function(inputfile)
 {
-  rmarkdown::output_format(
-    knitr_opts("html", FALSE,inputfile=inputfile),
-    rmarkdown::pandoc_options(
-      to = "html",
-      from = markdown_style,
-      ext = ".html",
-      #args = c("--chapters", pandoc_latex_engine_args(latex_engine))
-      #args = c("--chapters")
-    ),
-    clean_supporting = FALSE
-  )
+  #rmarkdown::output_format(
+  #  knitr_opts("html", FALSE,inputfile=inputfile),
+  #  rmarkdown::pandoc_options(
+  #    to = "html",
+  #    from = markdown_style,
+  #    ext = ".html",
+  #    #args = c("--chapters", pandoc_latex_engine_args(latex_engine))
+  #    args = c("--toc")
+  #  ),
+  #  clean_supporting = FALSE
+  #)
+  out=rmarkdown::html_document(
+	self_contained = FALSE,
+	highlight= 'kate',
+	toc=TRUE,
+	template= './template/frag.html',
+	md_extensions='-ascii_identifiers'
+	)
+  out$knitr=knitr_opts("html", FALSE,inputfile=inputfile)
+  #out$pandoc=rmarkdown::pandoc_options(
+  #    to = "html",
+  #    from = markdown_style,
+  #    ext = ".html",
+  #    #args = c("--chapters", pandoc_latex_engine_args(latex_engine))
+  #    args = c("--toc")
+  # )
+   out
 }
 
 markdown_style <- paste0(
