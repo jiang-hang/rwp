@@ -489,7 +489,16 @@ is_latex <- function() {
 
 #' embed png in the markdown
 #' 
-#' description
+#' work for both http and local image , 
+#' for html , the image
+#'   if path started with http, it will be put at the img tag directly
+#'
+#'   otherwise, path should have the "rfigures" in it and the png file 
+#'   should be existed in http://www.bagualu.net/wordpress/rfigures/
+#'   it will not copy the files there , so you need to do it manually
+#' 
+#' for pdf , both http and local img are supported, local image does 
+#'   not need to be on the website
 #' 
 #' @param path value
 #' @param dpi value
@@ -507,8 +516,10 @@ embed_png<- function(path, dpi = 200) {
 		system2("mkdir",c("./images"))
 	}
 	#print(paste("downloading image","./images/",dfile))
-	curl::curl_download(path,paste0("./images/",dfile))
-	path = paste0("./images/",dfile)
+	if(length(grep("http://",path)) >= 1){
+		curl::curl_download(path,paste0("./images/",dfile))
+	        path = paste0("./images/",dfile)
+	}
 
         meta <- png_meta(path)
         dpi <- dpi %||% meta$dpi[1] %||% stop("Unknown dpi", call. = FALSE)
@@ -522,15 +533,32 @@ embed_png<- function(path, dpi = 200) {
     ))
   } else {
 
-        #meta <- png_meta(path)
-        #dpi <- dpi %||% meta$dpi[1] %||% stop("Unknown dpi", call. = FALSE)
+            #meta <- png_meta(path)
+            #dpi <- dpi %||% meta$dpi[1] %||% stop("Unknown dpi", call. = FALSE)
+        if(length(grep("http",path)) >= 1){
+            knitr::asis_output(paste0(
+              "<img src='", path, "'/>"
+            ))
+	
+        }else{
+            strs=strsplit(path,"/")[[1]]
+            an=grep("rfigures",strs)
 
-    knitr::asis_output(paste0(
-      "<img src='", path, "'/>"
-      #" width='", round(meta$dim[1] / (dpi / 96)), "'",
-      #" height='", round(meta$dim[2] / (dpi / 96)), "'",
-      #" />"
-    ))
+                meta <- png_meta(path)
+                dpi <- dpi %||% meta$dpi[1] %||% stop("Unknown dpi", call. = FALSE)
+
+            width <- round(meta$dim[1] / dpi, 2)
+
+            if( length(an) == 1){
+                path=paste(strs[an:length(strs)],collapse="/")
+                knitr::asis_output(paste0(
+                  "<img src='", path, "' ",
+                  " width='", round(meta$dim[1] / (dpi / 96)), "'",
+                  " height='", round(meta$dim[2] / (dpi / 96)), "'",
+                  " />"
+                ))
+            }
+      }
   }
 }
 
@@ -547,4 +575,72 @@ embed_png<- function(path, dpi = 200) {
 png_meta <- function(path) {
   attr(png::readPNG(path, native = TRUE, info = TRUE), "info")
 }
+
+#' html format for rmarkdown
+#' 
+#' specified the fig.path according to the inputfile
+#' 
+#' @param inputfile value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+html_doc<-function(inputfile)
+{
+  rmarkdown::output_format(
+    knitr_opts("html", FALSE,inputfile=inputfile),
+    rmarkdown::pandoc_options(
+      to = "html",
+      from = markdown_style,
+      ext = ".html",
+      #args = c("--chapters", pandoc_latex_engine_args(latex_engine))
+      #args = c("--chapters")
+    ),
+    clean_supporting = FALSE
+  )
+}
+
+markdown_style <- paste0(
+  "markdown",
+  "+autolink_bare_uris",
+  "-auto_identifiers",
+  "+tex_math_single_backslash",
+  "-implicit_figures"
+)
+
+
+knitr_opts <- function(type = c("html", "latex"), chapter, inputfile, code_width = 65) {
+  type <- match.arg(type)
+
+  pkg <- list(
+    width = code_width
+  )
+
+  #p655.rmd ->p655
+  ff = stringr::str_extract(inputfile,"p\\d+")
+
+  chunk <- list(
+    comment = "#>",
+    collapse = TRUE,
+    #cache.path = paste0("_cache/", chapter, "/"),
+    #cache = TRUE,
+    fig.path = paste0("rfigures/", ff, "-"),
+    fig.width = 6,
+    fig.height = 6,
+    fig.retina = NULL,
+    dev = if (type == "html") "png" else "pdf",
+    dpi = if (type == "html") 96 else 300
+  )
+
+  hooks <- list(
+    #plot = if (type == "latex") html_plot(),
+    small_mar = function(before, options, envir) {
+      if (before)
+        par(mar = c(4.1, 4.1, 0.5, 0.5))
+    }
+  )
+
+  rmarkdown::knitr_options(pkg, chunk, hooks)
+}
+
 
