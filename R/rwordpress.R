@@ -603,7 +603,8 @@ html_doc<-function(inputfile)
 	highlight= 'kate',
 	toc=TRUE,
 	template= './template/frag.html',
-	md_extensions='-ascii_identifiers'
+	md_extensions='-ascii_identifiers',
+        lib_dir='./lib'
 	)
   out$knitr=knitr_opts("html", FALSE,inputfile=inputfile)
   #out$pandoc=rmarkdown::pandoc_options(
