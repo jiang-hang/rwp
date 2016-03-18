@@ -548,6 +548,8 @@ embed_png<- function(path, dpi = 200) {
                 dpi <- dpi %||% meta$dpi[1] %||% stop("Unknown dpi", call. = FALSE)
 
             width <- round(meta$dim[1] / dpi, 2)
+       
+            dpi = 100
 
             if( length(an) == 1){
                 path=paste(strs[an:length(strs)],collapse="/")
