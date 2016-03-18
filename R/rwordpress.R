@@ -3,6 +3,9 @@ library(httr)
 library(plyr)
 library(jiebaR)
 library(tm)
+library(magrittr)
+library(igraph)
+library(diagram)
 
 homeurl <- "http://www.bagualu.net/wordpress/wp-json/wp/v2/posts"
 markdownRoot <- "/home/xuyang/blog/"
@@ -369,7 +372,7 @@ buildbook<-function(ids,name="~/wpbook",title="",copyright="copyright.md",prefac
 	
 	#compile the file to tex
 	for (x in  mdfiles_in_newplace) {
-		rmarkdown::render(x,bookdown::tex_chapter())
+		rmarkdown::render(x,tex_doc(x))
 	}
 	
 	#fetch the template
@@ -616,6 +619,25 @@ html_doc<-function(inputfile)
   # )
    out
 }
+
+
+#' output for tex
+#' 
+#' fig.path should be fixed
+#' 
+#' @param inputfile value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+tex_doc<-function(inputfile)
+{
+  ff = stringr::str_extract(inputfile,"p\\d+")
+	out = bookdown::tex_chapter()
+	out$knitr$opts_chunk$fig.path=paste0("rfigures/",ff,"-")
+	out
+}
+
 
 markdown_style <- paste0(
   "markdown",
