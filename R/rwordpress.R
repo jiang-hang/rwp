@@ -350,7 +350,7 @@ buildbook<-function(ids,name="~/wpbook",title="",copyright="copyright.md",prefac
 	con=plyr::ldply(ids,getBlogV)
 	#get the markdown file from the content
 	mds=stringr::str_extract(con$content,"p\\d+")
-	finalfile=unlist(plyr::mlply(mds,matchfile))
+	finalfile=matchfile(mds)
 	#create the folder for the new book
 	print(finalfile)
 	if(file.exists(name)) {
@@ -405,6 +405,33 @@ buildbook<-function(ids,name="~/wpbook",title="",copyright="copyright.md",prefac
 	print(paste("book.pdf is generated in", name,"folder"))
 }
 
+
+#' generate the pdf for a single blog
+#' 
+#' description
+#' 
+#' @param id value
+#' @param title value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+single_pdf<-function(id,title="")
+{
+	con=getBlog(id)
+	mds=stringr::str_extract(con$content,"p\\d+")
+	finalfile=matchfile(mds,".(md|rmd)$")
+	#create the folder for the new book
+	print(finalfile)
+	if(length(finalfile) == 1) {
+		str(pdf_doc(finalfile))
+		rmarkdown::render(finalfile,pdf_doc(finalfile))
+	}else{
+		print("warning, non expected")	
+	}
+	
+}
+
 #' find the md or rmd file for given p123
 #' 
 #' description
@@ -414,10 +441,10 @@ buildbook<-function(ids,name="~/wpbook",title="",copyright="copyright.md",prefac
 #' @export 
 #' @examples 
 #' x=c(1,2,3) 
-matchfile<-function(x)
+matchfile<-function(x,pattern=".(md|rmd|tbl|Rds)$")
 {
 	#give the p123.* 
-	ffs=dir(markdownRoot,pattern=paste0(x,".(md|rmd|tbl|Rds)$"))
+	ffs=dir(markdownRoot,pattern=paste0(x,pattern))
 	sprintf("%s%s",markdownRoot,ffs)
 	#mdfile=sprintf("%s%s.md",markdownRoot,x)
 	#rmdfile=sprintf("%s%s.rmd",markdownRoot,x)
@@ -635,8 +662,27 @@ html_doc<-function(inputfile)
 tex_doc<-function(inputfile)
 {
   ff = stringr::str_extract(inputfile,"p\\d+")
-	out = bookdown::tex_chapter()
-	out$knitr$opts_chunk$fig.path=paste0("rfigures/",ff,"-")
+  out = bookdown::tex_chapter()
+  out$knitr$opts_chunk$fig.path=paste0("rfigures/",ff,"-")
+  out
+}
+
+#' replacement of rmarkdown::pdf_document
+#' 
+#' description
+#' 
+#' @param inputfile value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+pdf_doc<-function(inputfile)
+{
+	template=system.file("","pdf_template_single.tex",package='rwp')
+
+	out=rmarkdown::pdf_document(template = template,
+				latex_engine="xelatex")
+	out$knitr = knitr_opts("latex",FALSE,inputfile)
 	out
 }
 
