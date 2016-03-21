@@ -492,6 +492,19 @@ blogtable<-function(x)
 	}
 }
 
+#' table by xtable
+#' 
+#' description
+#' 
+#' @param x value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+blogtable2<-function(x)
+{
+	xtable::xtable(x)
+}
 #' target doc type for rmarkdown
 #' 
 #' description

@@ -3,6 +3,7 @@
 export(IdsNeedConv)
 export(addtitle)
 export(blogtable)
+export(blogtable2)
 export(buildbook)
 export(calcKeywords)
 export(convBlog)
