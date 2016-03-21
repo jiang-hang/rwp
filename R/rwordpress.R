@@ -488,12 +488,12 @@ addtitle<-function(fname){
 #' @export 
 #' @examples 
 #' x=c(1,2,3) 
-blogtable<-function(x)
+blogtable<-function(x,escape=TRUE)
 {
 	if(is_latex()) {
-	        knitr::kable(x,format="latex",align="c")
+	        knitr::kable(x,format="latex",align="c",escape=escape)
 	}else{
-        	knitr::kable(x,format="html",table.attr = "class=\"table table-bordered\"", align="c")
+        	knitr::kable(x,format="html",table.attr = "class=\"table table-bordered\"", align="c", escape=escape)
 	}
 }
 
@@ -534,6 +534,27 @@ is_latex <- function() {
 }
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
+
+
+
+#' generate link for both html and latex according to is_latex
+#' 
+#' description
+#' 
+#' @param href value
+#' @param name value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+link<-function(href,name)
+{
+	if(is_latex()){
+		paste0("\\href{",href,"}{",name,"}")
+	}else{
+		paste0("<a href='",href,"'>",name,"</a>")
+	}
+}
 
 #' embed png in the markdown
 #' 
@@ -748,4 +769,23 @@ knitr_opts <- function(type = c("html", "latex"), chapter, inputfile, code_width
   rmarkdown::knitr_options(pkg, chunk, hooks)
 }
 
+#' escape special LaTeX characters
+#' 
+#' @param x value
+#' @param newlines value
+#' @param spaces value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+escape_latex <- function(x, newlines = FALSE, spaces = FALSE) {
+  x = gsub('\\\\', '\\\\textbackslash', x)
+  x = gsub('([#$%&_{}])', '\\\\\\1', x)
+  x = gsub('\\\\textbackslash', '\\\\textbackslash{}', x)
+  x = gsub('~', '\\\\textasciitilde{}', x)
+  x = gsub('\\^', '\\\\textasciicircum{}', x)
+  if (newlines) x = gsub('(?<!\n)\n(?!\n)', '\\\\\\\\', x, perl = TRUE)
+  if (spaces) x = gsub('  ', '\\\\ \\\\ ', x)
+  x
+}
 
