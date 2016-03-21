@@ -350,7 +350,9 @@ buildbook<-function(ids,name="~/wpbook",title="",copyright="copyright.md",prefac
 	con=plyr::ldply(ids,getBlogV)
 	#get the markdown file from the content
 	mds=stringr::str_extract(con$content,"p\\d+")
-	finalfile=matchfile(mds)
+	print("md files")
+	print(mds)
+	finalfile=unlist(plyr::mlply(mds,matchfile))
 	#create the folder for the new book
 	print(finalfile)
 	if(file.exists(name)) {
@@ -368,10 +370,13 @@ buildbook<-function(ids,name="~/wpbook",title="",copyright="copyright.md",prefac
 	oldwd=getwd()
 	setwd(name)
 	mdfiles_in_newplace=dir(name,'*md')
+	print("new md files ")
+	print(paste(mdfiles_in_newplace,collapse="\n"))
 	plyr::m_ply(mdfiles_in_newplace,addtitle)
 	
 	#compile the file to tex
 	for (x in  mdfiles_in_newplace) {
+		print(paste0("rendering ",x))
 		rmarkdown::render(x,tex_doc(x))
 	}
 	
