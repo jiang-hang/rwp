@@ -4,10 +4,14 @@
 \alias{blogtable}
 \title{generate table for given dataframe}
 \usage{
-blogtable(x, escape = TRUE)
+blogtable(x, escape = TRUE, none_escape_column = NULL)
 }
 \arguments{
-\item{x}{data frame}
+\item{x}{value}
+
+\item{escape}{value}
+
+\item{none_escape_column}{which column do not need to be escaped}
 }
 \value{
 returndes

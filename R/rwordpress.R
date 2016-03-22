@@ -479,21 +479,71 @@ addtitle<-function(fname){
 	system2("sed",c("-ie",paste0("'1 i\\# ",bb$title,"'"),fname))
 }
 
-#' generate table for given dataframe
+#' escape data.frame column wise
 #' 
 #' description
 #' 
-#' @param x data frame 
+#' @param x value
+#' @param except value
 #' @return returndes
 #' @export 
 #' @examples 
 #' x=c(1,2,3) 
-blogtable<-function(x,escape=TRUE)
+partial_escape_dataframe<-function(x,except=none_escape_column)
+{	
+    if(is.null(except)){
+	stop("error in partial-escape-dataframe")
+    }
+    if(! is.numeric(except))
+    {
+    	nn=names(x)
+    	needescap=setdiff(nn,except)
+    }else{
+    	needescap=setdiff(1:dim(x)[2],except)
+    }
+
+    for(idx in needescap){
+	x[,idx]=escape_wrap(x[,idx])
+    }
+    x
+}
+
+
+escape_wrap<-function(x)
 {
-	if(is_latex()) {
-	        knitr::kable(x,format="latex",align="c",escape=escape)
+	if(is_latex()){
+		escape_latex(x)
 	}else{
-        	knitr::kable(x,format="html",table.attr = "class=\"table table-bordered\"", align="c", escape=escape)
+		escape_html(x)
+	}
+}
+
+#' generate table for given dataframe
+#' 
+#' description
+#' 
+#' @param x value
+#' @param escape value
+#' @param none_escape_column which column do not need to be escaped
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+blogtable<-function(x, escape=TRUE, none_escape_column=NULL)
+{
+	#only data frame is supported
+	if(is.data.frame(x)){
+	    if(! is.null(none_escape_column) ) {
+		x=partial_escape_dataframe(x,except=none_escape_column)
+		escape=FALSE
+	    }
+	    if(is_latex()) {
+	            knitr::kable(x,format="latex",align="c",escape=escape)
+	    }else{
+            	knitr::kable(x,format="html",table.attr = "class=\"table table-bordered\"", align="c", escape=escape)
+	    }
+	}else{
+		stop("blogtable supports only data.frame")
 	}
 }
 
@@ -789,3 +839,20 @@ escape_latex <- function(x, newlines = FALSE, spaces = FALSE) {
   x
 }
 
+
+#' escape html
+#' 
+#' description
+#' 
+#' @param x value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+escape_html = function(x) {
+  x = gsub('&', '&amp;', x)
+  x = gsub('<', '&lt;', x)
+  x = gsub('>', '&gt;', x)
+  x = gsub('"', '&quot;', x)
+  x
+}
