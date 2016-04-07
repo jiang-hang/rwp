@@ -682,10 +682,39 @@ html_doc<-function(inputfile)
 #' x=c(1,2,3) 
 tex_doc<-function(inputfile)
 {
-  ff = stringr::str_extract(inputfile,"p\\d+")
-  out = bookdown::tex_chapter()
-  out$knitr$opts_chunk$fig.path=paste0("rfigures/",ff,"-")
+  out = tex_chapter(inputfile)
   out
+}
+
+
+#' title 
+#' 
+#' description
+#' 
+#' @param inputfile value
+#' @param latex_engine value
+#' @param code_width value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+tex_chapter <- function(inputfile,
+                        latex_engine = c("xelatex", "pdflatex", "lualatex"),
+                        code_width = 65) {
+  options(digits = 3)
+  set.seed(1014)
+
+  latex_engine <- match.arg(latex_engine)
+  rmarkdown::output_format(
+    knitr_opts("latex", NULL, inputfile),
+    rmarkdown::pandoc_options(
+      to = "latex",
+      from = markdown_style,
+      ext = ".tex",
+      args = c("--chapters")
+    ),
+    clean_supporting = FALSE
+  )
 }
 
 #' replacement of rmarkdown::pdf_document
@@ -713,8 +742,8 @@ markdown_style <- paste0(
   "+autolink_bare_uris",
   "-auto_identifiers",
   "+tex_math_single_backslash",
-  "-implicit_figures",
-  "+east_asian_line_breaks"
+  "-implicit_figures"
+#  "+east_asian_line_breaks"
 )
 
 
