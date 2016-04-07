@@ -4,7 +4,7 @@
 \alias{blogtable}
 \title{generate table for given dataframe}
 \usage{
-blogtable(x, escape = TRUE, none_escape_column = NULL)
+blogtable(x, escape = TRUE, none_escape_column = NULL, caption = "")
 }
 \arguments{
 \item{x}{value}

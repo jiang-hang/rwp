@@ -86,30 +86,6 @@ updateBlog<-function(id)
         system2("curl",c("--user", "admin:Helloworld1","-X","POST",murl,"-d",paste0("content=[bgurl]markdown/p",id,".html[/bgurl]")))
 }
 
-#' title 
-#' 
-#' description
-#' 
-#' @param id value
-#' @return returndes
-#' @export 
-#' @examples 
-#' x=c(1,2,3) 
-needConv<-function(id)
-{
-    print(paste0("chekcing artical ",id," ..."))
-    pageurl=paste0(homeurl,"/",id)
-    yy<-GET(pageurl)
-    jj=fromJSON(content(yy,"text",encoding="utf-8"))
-    res=c(jj$title$rendered,jj$content$rendered)
-    done=grep("bgurl",res)
-    ret = 1
-    if(length(done) >= 1) {
-        ret = 0 
-    }
-    c(id,ret)
-}
-
 #' fetch the blog IDs , save it in the ./allids.Rds
 #' 
 #' description
@@ -187,21 +163,6 @@ calcKeywords<-function(ids)
 
 #' title 
 #' 
-#' list the ids that need to be converted
-#' 
-#' @return returndes
-#' @export 
-#' @examples 
-#' x=c(1,2,3) 
-IdsNeedConv<-function()
-{
-	allids = readRDS("./allids.Rds")
-	nids=ldply(allids,needConv)
-	saveRDS(nids,"needIds.Rds")
-}
-
-#' title 
-#' 
 #' description
 #' 
 #' @param id value
@@ -257,43 +218,13 @@ convOneBlog<-function(id)
         print("it is converted already")
     }else{
 
-    ##check the [sourcecode ...] and [code ...]
-    #codes=c("c","php","python","bash","html","xml","java","javascript","perl")
-    #matches=sprintf("<pre class='sourceCode %s'><code class='sourceCode %s'>",codes,codes)
-    ##names(matches) = sprintf("\\[code=&#8217;%s&#8217;\\]",codes)
-    #names(matches) = sprintf("\\[sourcecode language=&#8217;%s&#8217;\\]",codes)
-    #
-    #print(matches)
-    #fcontent=stringr::str_replace_all(fcontent,matches)
-
-    ##replace the [/code]
-    #matches=c("</code></pre>")
-    ##names(matches)=c("\\[\\/code\\]")
-    #names(matches)=c("\\[\\/sourcecode\\]")
-    #print(matches)
-    #fcontent=stringr::str_replace_all(fcontent,matches)
-
-    #newhtmlfile=paste0(filename,"1")
-    #cat(fcontent,file=newhtmlfile,sep="\n")
-    #print("conversion done")
-
-    #mdfile=paste0("./p",id,".md")
-    #system2("pandoc",c("-f","html","-t","markdown","-o",mdfile,newhtmlfile))
-
     mdfile=paste0("./p",id,".md")
     system2("pandoc",c("-f","html","-t","markdown","-o",mdfile,htmlfile))
 
     system2("cp",c(mdfile,"/home/xuyang/blog/"))
 
-    #update the blog content
-    #set the blog content
-    #updateBlog(id,title,content)
     updateBlog(id)
-    
 
-    #update the blog and copy the generated html
-    #gen the html again
-    #system2("pandoc",c("-t","html","-f","markdown","-s","-o",filename,newmdfile))
     } 
 }
 
@@ -529,7 +460,7 @@ escape_wrap<-function(x)
 #' @export 
 #' @examples 
 #' x=c(1,2,3) 
-blogtable<-function(x, escape=TRUE, none_escape_column=NULL)
+blogtable<-function(x, escape=TRUE, none_escape_column=NULL, caption="")
 {
 	#only data frame is supported
 	if(is.data.frame(x)){
@@ -538,9 +469,10 @@ blogtable<-function(x, escape=TRUE, none_escape_column=NULL)
 		escape=FALSE
 	    }
 	    if(is_latex()) {
-	            knitr::kable(x,format="latex",align="c",escape=escape)
+	            knitr::kable(x,format="latex",align="c",escape=escape,caption=caption)
 	    }else{
-            	knitr::kable(x,format="html",table.attr = "class=\"table table-bordered\"", align="c", escape=escape)
+            	knitr::kable(x,format="html",table.attr = "class=\"table table-bordered\"", 
+                             align="c", escape=escape, caption=caption)
 	    }
 	}else{
 		stop("blogtable supports only data.frame")
@@ -781,7 +713,8 @@ markdown_style <- paste0(
   "+autolink_bare_uris",
   "-auto_identifiers",
   "+tex_math_single_backslash",
-  "-implicit_figures"
+  "-implicit_figures",
+  "+east_asian_line_breaks"
 )
 
 
