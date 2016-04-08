@@ -7,9 +7,20 @@ library(magrittr)
 library(igraph)
 library(diagram)
 
-homeurl <- "http://www.bagualu.net/wordpress/wp-json/wp/v2/posts"
-markdownRoot <- "/home/xuyang/blog/"
 rwpEnv<-new.env()
+
+user <- Sys.getenv("WP_USER")
+#wordpress user with the update privilege
+pwd <- Sys.getenv("WP_PASS")
+#password for the user
+markdownRoot <- Sys.getenv("MARKDOWN_ROOT")
+#local markdown root directory, where the markdown files for the blog exist
+homeurl <- Sys.getenv("BLOG_APIURL")
+#blog api url, see the WP_API
+
+if (user == "" || pwd == "" || markdownRoot == "" || homeurl == "") {
+  stop("Set WP_USER, WP_PASS, MARKDOWN_ROOT, BLOG_APIURL, env vars", call. = FALSE)
+}
 
 
 mixseg = worker()
@@ -83,7 +94,7 @@ updateBlog<-function(id)
 {
 	murl=paste0(homeurl,"/",id)
 	#use curl instead
-        system2("curl",c("--user", "admin:Helloworld1","-X","POST",murl,"-d",paste0("content=[bgurl]markdown/p",id,".html[/bgurl]")))
+        system2("curl",c("--user", paste0(user,":",pwd),"-X","POST",murl,"-d",paste0("content=[bgurl]markdown/p",id,".html[/bgurl]")))
 }
 
 #' fetch the blog IDs , save it in the ./allids.Rds
@@ -184,8 +195,7 @@ genHtml<-function(id){
 
 }
 
-#convert one blog from html to markdown
-#' title 
+#' convert one blog from html to markdown
 #' 
 #' description
 #' 
@@ -742,8 +752,8 @@ markdown_style <- paste0(
   "+autolink_bare_uris",
   "-auto_identifiers",
   "+tex_math_single_backslash",
-  "-implicit_figures"
-#  "+east_asian_line_breaks"
+  "-implicit_figures",
+  "+east_asian_line_breaks"
 )
 
 
