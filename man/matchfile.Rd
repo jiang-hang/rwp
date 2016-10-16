@@ -4,7 +4,7 @@
 \alias{matchfile}
 \title{find the md or rmd file for given p123}
 \usage{
-matchfile(x, pattern = ".(md|rmd|tbl|Rds)$")
+matchfile(x, pattern = ".(md|rmd|tbl|Rds|org)$")
 }
 \arguments{
 \item{x}{value}

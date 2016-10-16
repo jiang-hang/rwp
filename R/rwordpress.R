@@ -351,6 +351,67 @@ buildbook<-function(ids,name="~/wpbook",title="",copyright="copyright.md",prefac
 	print(paste("book.pdf is generated in", name,"folder"))
 }
 
+#' orgbook
+#' 
+#' convert the blog ids to a org file
+#' 
+#' @param ids value
+#' @param name value
+#' @param title value
+#' @param copyright value
+#' @param preface value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+orgbook<-function(ids,name="~/orgbook",title="",copyright="copyright.md",preface="preface.md")
+{
+	#get the titles and the markdown file
+	con=plyr::ldply(ids,getBlogV)
+	#get the markdown file from the content
+	mds=stringr::str_extract(con$content,"p\\d+")
+	print("md files")
+	print(mds)
+	finalfile=unlist(plyr::mlply(mds,matchfile))
+	#create the folder for the new book
+	print(finalfile)
+	if(file.exists(name)) {
+		system2("rm",c(name,"-rf"))
+	}
+
+	system2("mkdir",c(name,"-p"))
+	system2("mkdir",c(paste0(name,"/rfigures"),"-p"))
+	file.copy(finalfile,name,overwrite=TRUE)
+
+	#adding the title
+	#get the title firstly
+	oldwd=getwd()
+	setwd(name)
+	mdfiles_in_newplace=dir(name,'*md')
+	print(paste(mdfiles_in_newplace,collapse="\n"))
+	plyr::m_ply(mdfiles_in_newplace,addtitle)
+	
+	orgfiles_in_newplace=dir(name,'*org')
+	print(paste(orgfiles_in_newplace,collapse="\n"))
+	plyr::m_ply(orgfiles_in_newplace,addtitle)
+
+	#compile the file to org
+	for (x in mdfiles_in_newplace) {
+		print(paste0("rendering ",x))
+		#replace the .md to .org
+                yy = stringi::stri_replace_all_regex(x,"\\.md","\\.org")
+		system2("pandoc",c("-f","markdown","-t","org","-o",yy,x))
+	}
+	
+	##generate the final org file
+	ff<-file("final.org","w")
+	ll=sprintf("#+include: p%d.org :minlevel 1",ids)
+	writeLines("ctex_",ff)
+	writeLines(ll,ff)
+	close(ff)
+	print(paste("book.pdf is generated in", name,"folder"))
+}
+
 
 #' generate the pdf for a single blog
 #' 
@@ -378,6 +439,19 @@ single_pdf<-function(id,title="")
 	
 }
 
+#' convert a url to pdf / todo
+#' 
+#' description
+#' 
+#' @param url value
+#' @return returndes
+#' @export 
+#' @examples 
+#' x=c(1,2,3) 
+url2pdf<-function(url) 
+{
+}
+
 #' find the md or rmd file for given p123
 #' 
 #' description
@@ -387,7 +461,7 @@ single_pdf<-function(id,title="")
 #' @export 
 #' @examples 
 #' x=c(1,2,3) 
-matchfile<-function(x,pattern=".(md|rmd|tbl|Rds)$")
+matchfile<-function(x,pattern=".(md|rmd|tbl|Rds|org)$")
 {
 	#give the p123.* 
 	ffs=dir(markdownRoot,pattern=paste0(x,pattern))
@@ -416,8 +490,15 @@ matchfile<-function(x,pattern=".(md|rmd|tbl|Rds)$")
 addtitle<-function(fname){
 	tt=stringr::str_extract(fname,'\\d+')
 	print(paste("fetch title",tt))
-	bb=getBlog(tt)
-	system2("sed",c("-ie",paste0("'1 i\\# ",bb$title,"'"),fname))
+        if( is.na(tt) ){
+	}else{
+	    bb=getBlog(tt)
+            if( grep("org",fname) ){
+   	         system2("sed",c("-ie",paste0("'1 i\\* ",bb$title,"\\n'"),fname))
+	    }else{
+   	         system2("sed",c("-ie",paste0("'1 i\\# ",bb$title,"'"),fname))
+	    }
+	}
 }
 
 #' escape data.frame column wise
